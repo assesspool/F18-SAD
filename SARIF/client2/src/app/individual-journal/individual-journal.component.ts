@@ -12,13 +12,8 @@ import {Router} from '@angular/router';
 })
 export class IndividualJournalComponent implements OnInit {
 
-   thisJournal  = Journal;
-   /*
-    * THIS SHOULD BE PRIVATE BUT WON'T COMPILE
-    *
-    * SHOULD BE REWORKED TO ACCOUNT FOR THIS
-    */
-   journals = [];
+   thisJournal: Journal;
+   private journals = [];
 
   constructor(
     private journalServ: JournalizeService,
@@ -38,7 +33,7 @@ export class IndividualJournalComponent implements OnInit {
         for(let journ of this.journals){
           if(temp == journ.Reference){
             this.thisJournal = journ;
-            break
+            break;
           }
         }
         console.log(this.journals);
