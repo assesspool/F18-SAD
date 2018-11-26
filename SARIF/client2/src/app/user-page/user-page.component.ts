@@ -39,7 +39,12 @@ export class UserPageComponent implements OnInit {
         this.access = 1;
       }
 <<<<<<< HEAD
+<<<<<<< HEAD
       else if (this.comp.getRole() === 'manager') {
+=======
+      else if(this.comp.getRole() === 'manager') {
+
+>>>>>>> Tyler-G-Reports
 =======
       else if(this.comp.getRole() === 'manager') {
 
@@ -77,11 +82,14 @@ export class UserPageComponent implements OnInit {
     this.router.navigate(['UserPage/generalLedger']);
   }
 <<<<<<< HEAD
+<<<<<<< HEAD
 
   viewTrialBalance(){
     this.router.navigate(['UserPage/trial-balance'])
 
 =======
+=======
+>>>>>>> Tyler-G-Reports
   viewTrialBalance() {
     this.data.setTrialBalance('Unadjusted Trial Balance');
     this.router.navigate(['UserPage/trial-balance']);
@@ -91,11 +99,18 @@ export class UserPageComponent implements OnInit {
   }
   viewRetainedEarnings(){
     this.router.navigate(['UserPage/statement_of_retained_earnings']);
+<<<<<<< HEAD
 >>>>>>> Tyler-G-Reports
   }
   viewBalanceSheet(){
     this.router.navigate(['UserPage/balance_sheet']);
   }
+=======
+  }
+  viewBalanceSheet(){
+    this.router.navigate(['UserPage/balance_sheet']);
+  }
+>>>>>>> Tyler-G-Reports
   viewAdjustedTrialBalance() {
     this.data.setTrialBalance('Adjusted Trial Balance');
     this.router.navigate(['UserPage/adjusted_trial_balance']);

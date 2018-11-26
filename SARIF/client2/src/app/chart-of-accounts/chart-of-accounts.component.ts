@@ -4,6 +4,7 @@ import { AppComponent } from '../app.component';
 import { CoAService } from '../services/coa.service';
 import { UserLogService } from '../services/user-log.service';
 import {NgForm} from '@angular/forms';
+import {NgxPaginationModule} from 'ngx-pagination';
 import createNumberMask from 'text-mask-addons/dist/createNumberMask';
 
 @Component({
@@ -18,6 +19,7 @@ export class ChartOfAccountsComponent implements OnInit {
   editCoA = new CoA();
   accounts = [];
   accountData = new CoA();
+  prevData = new CoA();
   accountId: number;
   temp = [];
 //input data for search and sort
@@ -30,10 +32,19 @@ export class ChartOfAccountsComponent implements OnInit {
   //variables to indicate conditions are met
   accountNameExist = 1;
   accountNumberExist = 1;
+
+  accountNameCreateExist = 1;
+  accountNumberCreateExist = 1;
   numberHasDecimal = 1;
 
   //set user access
   access = 0;
+
+  //number of accounts listed on a page at a time
+  quantity = 10;
+  //current page
+  currPage = 1;
+  perPage = 10;
 
 //currencyMask
 /////EDITED 10/31 BECAUSE THE MASK WAS TOO SPOOKY
@@ -113,15 +124,8 @@ export class ChartOfAccountsComponent implements OnInit {
   submit() {
     this.CoA.createdBy = this.comp.getUserName();
     //Check to see if account number is a number
-    if (isNaN(this.CoA.accountNumber)) {
-      return window.alert("Enter a number for account number");
-    }
-    ;
+
     //Check to see if account balance is a number
-    if (isNaN(this.CoA.originalBalance)) {
-      return window.alert("Enter a number for the balance");
-    }
-    ;
     //Set asset and revenue account types to normal side debit
     if (this.CoA.accountType == "Assets" || this.CoA.accountType == "Expenses") {
       this.CoA.normalSide = "Debit";
@@ -136,36 +140,24 @@ export class ChartOfAccountsComponent implements OnInit {
     this.editCoA = this.CoA;
 
     //Check to see if another account exists with same number or name
-    if (this.numberHasDecimal == 2) {
+    if (this.accountNameCreateExist == 2 || this.accountNumberCreateExist == 2) {
       console.log('cannot continue');
     }
     else {
-      this.coaService.findAll().subscribe(
-        (account) => {
-          this.temp = account;
-          for (var i = 0; i < this.temp.length; i++) {
-            //Check for account name
-            if (this.temp[i].accountName == this.CoA.accountName) {
-              return window.alert("Account with same account name found. Enter different account name.");
-            }
-            //Check for account number
-            if (this.temp[i].accountNumber == this.CoA.accountNumber) {
-              return window.alert("Account with the same account number found. Enter a different account number.")
-            }
-          }
           //If account name and number not found, create the account
           this.CoA.accountName = this.CoA.accountName.charAt(0).toLocaleUpperCase() + this.CoA.accountName.substr(1);
+          this.CoA.accountName = this.CoA.accountName.replace(/^\s+|\s+$/g, "");
           this.coaService.addAccount(this.CoA)
             .subscribe(() => {
-              this.logData.create(this.comp.getUserName(), this.CoA.createdBy + 'created account ' + this.CoA.accountName).subscribe();
+              let accountDataString = JSON.stringify(this.CoA);
+              this.logData.createAccountLog(this.comp.getUserName(), "Account created", accountDataString).subscribe();
               //Close modal
               let modal = document.getElementById("createAccountModal");
               modal.style.display = "none";
               this.accountForm.reset();
               this.viewAccountsSort(this.column, 'ASC', this.columnSearch, this.criteria);
             });
-        });
-    }
+        }
   }
 
   //Closes modal after clicking on cancel in modal
@@ -196,6 +188,14 @@ export class ChartOfAccountsComponent implements OnInit {
   }
 
   submitEdit() {
+    var prevDataString = "";
+    this.coaService.getByName(this.editCoA.accountName)
+    .subscribe((account) => {
+      this.prevData = account;
+      prevDataString = JSON.stringify(account);
+    })
+    console.log(this.prevData);
+    
     if ((this.editCoA.accountNumber != null) && isNaN(this.editCoA.accountNumber)) {
       return window.alert("Enter a number for account number");
     };
@@ -206,33 +206,46 @@ export class ChartOfAccountsComponent implements OnInit {
     //Set the account Id correctly to chosen account
     this.editCoA.caId = this.accountId;
 
+    console.log('previous balance' +this.accountData.currentBalance);
     //Set asset and revenue account types to normal side debit
-    if (this.editCoA.accountType == "Assets" || this.editCoA.accountType == "Revenue") {
+    if (this.editCoA.accountType == "Assets" || this.editCoA.accountType == "Expenses") {
       this.editCoA.normalSide = "Debit";
     }
     else {
       this.editCoA.normalSide = "Credit";
     }
-    //Reset current balance to new orignal balance
-    this.editCoA.currentBalance = this.editCoA.originalBalance;
+    //--Code here isnt correct
+        //Reset current balance to new orignal balance
+        //this.editCoA.currentBalance = this.editCoA.originalBalance;
 
     //Check to see if another account exists with same number or name
     //If account name and number not found, create the account
-
+    this.editCoA.currentBalance = this.accountData.currentBalance;
     if(this.numberHasDecimal == 2) {
       console.log('decimal required');
     }
     else {
       this.editCoA.accountName = this.editCoA.accountName.charAt(0).toLocaleUpperCase() + this.editCoA.accountName.substr(1);
+      this.editCoA.accountName = this.editCoA.accountName.replace(/^\s+|\s+$/g, "");
       console.log('edit made');
       this.coaService.updateAccount(this.editCoA)
         .subscribe(() => {
-          this.logData.create(this.comp.getUserName(), 'Updated account ' + this.editCoA.accountName).subscribe();
+          var newDataString = JSON.stringify(this.editCoA);
+          this.logData.updateAccountLog(this.comp.getUserName(), 'Account updated', prevDataString, newDataString).subscribe();
           let modal = document.getElementById("editAccountModal");
           modal.style.display = "none";
           this.viewAccountsSort(this.column, 'ASC', this.columnSearch, this.criteria);
         });
     }
+  }
+
+  async compareAccountNameCreate(event){
+    this.CoA.accountName = event;
+      this.coaService.compareAccountName(this.CoA.accountName).subscribe(response => {
+        console.log("button changed");
+        this.accountNameCreateExist = response;
+        console.log(this.accountNameCreateExist);
+    })
   }
 
   async compareAccountNameUpdate(event){
@@ -249,6 +262,14 @@ export class ChartOfAccountsComponent implements OnInit {
         console.log(this.accountNameExist);
       });
     }
+  }
+  async compareAccountNumberCreate(event){
+      this.CoA.accountNumber = event;
+        this.coaService.compareAccountNumber(this.CoA.accountNumber).subscribe(response => {
+          console.log("button changed");
+          this.accountNumberCreateExist = response;
+          console.log(this.accountNameCreateExist);
+        });
   }
 
   async compareAccountNumberUpdate(event){

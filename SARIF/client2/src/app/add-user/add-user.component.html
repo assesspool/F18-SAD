@@ -33,12 +33,22 @@
       </div>
 
         <div class="form-group">
+<<<<<<< HEAD
+=======
+
+>>>>>>> Tyler-G-Reports
           <label for="userRole">Role: </label>
           <select class="form-control" required [(ngModel)]="user.userRole" id="userRole" name="roleType" >
             <option>accountant</option>
             <option>manager</option>
             <option>admin</option>
           </select>
+<<<<<<< HEAD
+=======
+          <label for="userName">User Name</label>
+          <input type="text" class="form-control" id="userName2" (ngModelChange)="compareUserName($event)" placeholder="User Name" required [(ngModel)]="user.userName"
+                 name="userName" >
+>>>>>>> Tyler-G-Reports
         </div>
 
         <div class="form-group">
@@ -62,9 +72,9 @@
           Password is not acceptable
         </div>
 
-        <button (click)="submit();" id="submitBtn" [disabled]="!addUserForm.form.valid" >Submit</button>
-        <input type="reset">
-        <button (click)="close(); addUserForm.reset()" id="closeModalBtn">Cancel</button>
+        <button (click)="submit();" id="submitBtn" [disabled]="!addUserForm.form.valid" class="btn btn-primary ">Submit</button>
+        <input class="btn btn-info " style="position: relative; left: 5px" type="reset">
+        <button (click)="close(); addUserForm.reset()" id="closeModalBtn" class="btn btn-danger " style="position: relative; left: 10px">Cancel</button>
       </div>
 
       <div class="leftContent">
@@ -79,7 +89,7 @@
                  name="lastName">
         </div>
 
-        <div class="form-group" style="margin-top:188px;">
+        <div class="form-group" style="margin-top:258px;">
           <label for="answer">Answer</label>
           <input type="text" class="form-control" id="answer" placeholder="Answer" required [(ngModel)]="user.securityA"
                  name="password3" >
@@ -160,9 +170,9 @@
          <div *ngIf="passwordError == 1" class="alert alert-danger"  style="width: 250px;">
            Password is not acceptable
          </div>
-         <button (click)="submitEdit();" id="submitBtn5" [disabled]="!editUserForm.form.valid" >Submit</button>
-         <button (click)="resetUpdate()" id="closeModalBtn3">Reset</button>
-       <button (click)="close2();" id="closeModalBtn2">Cancel</button>
+         <button (click)="submitEdit();" id="submitBtn5" [disabled]="!editUserForm.form.valid" class="btn btn-primary ">Submit</button>
+         <button (click)="resetUpdate()" id="closeModalBtn3"  class="btn btn-info " style="position: relative; left: 5px">Reset</button>
+       <button (click)="close2();" id="closeModalBtn2"  class="btn btn-danger " style="position: relative; left: 10px">Cancel</button>
        </div>
 
        <div class="leftContent">
@@ -267,11 +277,13 @@
       <th (click)="viewUsersSort('createdAt','ASC',columnSearch,criteria); column='createdAt'">Created at</th>
       <th (click)="viewUsersSort('active','ASC',columnSearch,criteria); column='active'">Active</th>
     </tr>
-    <tr *ngFor="let user of users">
-      <td>{{ user.userName}}</td>
+    <tr *ngFor="let user of users | paginate: { itemsPerPage: perPage, currentPage: currPage }  ">
+      <td *ngIf="user.userName != '[pending]'">{{ user.userName}}</td>
+      <td *ngIf="user.userName == '[pending]'" style="color: red">{{ user.userName}}</td>
       <td>{{ user.firstName }}</td>
       <td>{{ user.lastName }}</td>
-      <td>{{ user.userPassword}}</td>
+      <td *ngIf="user.userPassword != '[pending]'">{{ user.userPassword}}</td>
+      <td *ngIf="user.userPassword == '[pending]'" style="color: red">{{ user.userPassword}}</td>
       <td>{{ user.email }}</td>
       <td>{{ user.userRole }}</td>
       <td>{{ user.updatedAt | date: 'MM/dd/yyyy  HH:mm:ss'}}</td>
@@ -282,6 +294,20 @@
       <button class="btn btn-primary" (click)="viewData(user.userId)">More</button>
     </tr>
   </table>
+  <div style="display: inline-block">
+    <div style="float: left; width: 100px; position: relative; left: 5px; top: 3px">
+      <p >{{"Per Page:"}}</p>
+    </div>
+    <select id="perPage" class="form-control" style="position:relative; float: left; width: 75px; right: 20px"
+            [(ngModel)]="perPage"
+            name="account">
+      <option>5</option>
+      <option selected>10</option>
+      <option>15</option>
+      <option>20</option>
+    </select>
+    <pagination-controls style="float: left" (pageChange)="currPage = $event"></pagination-controls>
+  </div>
 </div>
 <!--
 <div id="editUser">

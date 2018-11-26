@@ -4,6 +4,16 @@ import {SharedDataService} from '../services/shared-data.service';
 import { Journal } from '../journal';
 import {JournalAccount} from '../journalAccount';
 import {Router} from '@angular/router';
+import {HttpClient, HttpHeaders} from '@angular/common/http';
+
+const httpOptions = {
+  headers: new HttpHeaders({
+    //'Content-Type': 'application/json',
+    'Access-Control-Allow-Origin': '*',
+    "Access-Control-Allow-Headers": '*',
+    'Access-Control-Allow-Methods': 'GET,PUT,POST,DELETE'
+  })
+};
 
 @Component({
   selector: 'app-individual-journal',
@@ -11,14 +21,22 @@ import {Router} from '@angular/router';
   styleUrls: ['./individual-journal.component.css']
 })
 export class IndividualJournalComponent implements OnInit {
+<<<<<<< HEAD
 
    thisJournal: Journal;
    private journals = [];
+=======
+  documentInfo = '';
+  fileRetrieve = 'http://localhost:8080/api/retreiveJournalFiles';
+   thisJournal: Journal;
+  journals = [];
+>>>>>>> Tyler-G-Reports
 
   constructor(
     private journalServ: JournalizeService,
     private data: SharedDataService,
     private router: Router,
+    private http: HttpClient,
   ) { }
 
   ngOnInit() {
@@ -33,7 +51,12 @@ export class IndividualJournalComponent implements OnInit {
         for(let journ of this.journals){
           if(temp == journ.Reference){
             this.thisJournal = journ;
+<<<<<<< HEAD
             break;
+=======
+            console.log(this.thisJournal);
+            break
+>>>>>>> Tyler-G-Reports
           }
         }
         console.log(this.journals);
@@ -55,6 +78,31 @@ export class IndividualJournalComponent implements OnInit {
     }
     return num;
 
+  }
+
+  getJournalFile(event: number){
+    this.http.post<any>(this.fileRetrieve, {jID: event}, httpOptions).subscribe( result => {
+      console.log(result.FileData.data);
+      var res = result.FileData.data;
+      for(let r of res){
+        if(r == 10){
+          this.documentInfo = this.documentInfo + '\n';
+        }
+        else {
+          let res2 = String.fromCharCode(r);
+          this.documentInfo = this.documentInfo + res2;
+        }
+      }
+      console.log(this.documentInfo);
+
+    });
+    var modal = document.getElementById('viewSource');
+    modal.style.display = "block";
+  }
+  closeFile() {
+    this.documentInfo = '';
+    let modal = document.getElementById("viewSource");
+    modal.style.display = "none";
   }
 
 }
