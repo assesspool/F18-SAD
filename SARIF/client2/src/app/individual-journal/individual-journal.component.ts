@@ -21,16 +21,10 @@ const httpOptions = {
   styleUrls: ['./individual-journal.component.css']
 })
 export class IndividualJournalComponent implements OnInit {
-<<<<<<< HEAD
-
-   thisJournal: Journal;
-   private journals = [];
-=======
   documentInfo = '';
   fileRetrieve = 'http://localhost:8080/api/retreiveJournalFiles';
    thisJournal: Journal;
   journals = [];
->>>>>>> Tyler-G-Reports
 
   constructor(
     private journalServ: JournalizeService,
@@ -51,12 +45,8 @@ export class IndividualJournalComponent implements OnInit {
         for(let journ of this.journals){
           if(temp == journ.Reference){
             this.thisJournal = journ;
-<<<<<<< HEAD
-            break;
-=======
             console.log(this.thisJournal);
-            break
->>>>>>> Tyler-G-Reports
+            break;
           }
         }
         console.log(this.journals);

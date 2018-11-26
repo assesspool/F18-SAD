@@ -9,5 +9,4 @@ export class Journal {
   FileID: number;
   JournalAccounts: JournalAccount[];
   acceptance: string;
-  JournalAccounts: JournalAccount[];
 }
