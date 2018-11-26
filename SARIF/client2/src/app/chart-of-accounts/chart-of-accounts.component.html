@@ -7,7 +7,7 @@
       <div class="form-group">
         <label for="accountName">Account Name</label><br>
         <input type="text" class="form-control" id="accountName" style="text-transform: capitalize"
-                placeholder="Account Name" required [(ngModel)]="CoA.accountName"
+               (ngModelChange)="compareAccountNameCreate($event)" placeholder="Account Name" required [(ngModel)]="CoA.accountName"
           name="accountName" #accountNam="ngModel">
       </div>
       <div [hidden]="accountNam.valid || accountNam.pristine" class="alert alert-danger" style="width: 250px;">
@@ -16,7 +16,8 @@
 
       <div class="form-group">
         <label for="accountNumber">Account Number</label><br>
-        <input type="text" class="form-control" id="accountNumber" placeholder="Account Number" required [(ngModel)]="CoA.accountNumber"
+        <input type="text" class="form-control" id="accountNumber"
+               (ngModelChange)="compareAccountNumberCreate($event)" placeholder="Account Number" required [(ngModel)]="CoA.accountNumber"
           name="accountNumber" #accountNumbe="ngModel">
       </div>
       <div [hidden]="accountNumbe.valid || accountNumbe.pristine" class="alert alert-danger" style="width: 250px;">
@@ -70,21 +71,24 @@
 
       <div class="form-group">
         <label for="comment">Comments</label><br>
-        <input type="text" class="form-control" id="comment" placeholder="Account Description" required [(ngModel)]="CoA.comment"
+        <input type="text" class="form-control" id="comment2" placeholder="Account Description" required [(ngModel)]="CoA.comment"
           name="comment" #description="ngModel" required>
       </div>
       <div [hidden]="description.valid || description.pristine" class="alert alert-danger" style="width: 250px;">
         Account Description is required
       </div>
 
-      <div *ngIf="numberHasDecimal==2" class="alert alert-danger" style="width: 250px;">
-        Balance must be in decimal format
+      <div *ngIf="accountNameCreateExist == 2" class="alert alert-danger"  style="width: 250px;">
+        Account Name already exists
+      </div>
+      <div *ngIf="accountNumberCreateExist == 2" class="alert alert-danger"  style="width: 250px;">
+        Account Number already exists
       </div>
 
 
-      <button (click)="submit()" id="submitBtn" [disabled]="!addAccountForm.form.valid">Submit</button>
-      <input type="reset">
-      <button (click)="close()" id="closeModalBtn4">Cancel</button>
+      <button (click)="submit()" id="submitBtn" [disabled]="!addAccountForm.form.valid" class="btn btn-primary ">Submit</button>
+      <input type="reset" class="btn btn-info" style="position: relative; left: 5px">
+      <button (click)="close()" id="closeModalBtn4" class="btn btn-danger" style="position: relative; left: 10px">Cancel</button>
     </form>
   </div>
 </div>
@@ -124,6 +128,7 @@
         <label for="accountSubType">Account Subtype: {{ accountData.accountSubType}}</label><br>
         <select required [(ngModel)]="editCoA.accountSubType" value="{{accountData.accountSubType}}" name="accountSubType" #accountSubType="ngModel">
           <option>Current Assets</option>
+          <option>Long-term Assets</option>
           <option>Property, Plant, and Equipment</option>
           <option>Current Liabilities</option>
           <option>Long-term Liabilities</option>
@@ -167,9 +172,9 @@
         Balance must be in decimal format
       </div>
 
-      <button (click)="submitEdit()" id="submitEditBtn">Submit</button>
-      <button (click)="resetUpdate()" id="closeModalBtn3">Reset</button>
-      <button (click)="close2()" id="closeModalBtn">Cancel</button>
+      <button (click)="submitEdit()" id="submitEditBtn" class="btn btn-primary ">Submit</button>
+      <button (click)="resetUpdate()" id="closeModalBtn3" class="btn btn-info" style="position: relative; left: 5px">Reset</button>
+      <button (click)="close2()" id="closeModalBtn" class="btn btn-danger" style="position: relative; left: 10px">Cancel</button>
     </form>
   </div>
 </div>
@@ -200,7 +205,7 @@
       <th (click)="viewAccountsSort('active','ASC',columnSearch,criteria)">Active</th>
       <th (click)="viewAccountsSort('createdBy','ASC',columnSearch,criteria)">Created By</th>
     </tr>
-    <tr *ngFor="let account of accounts">
+    <tr *ngFor="let account of accounts | paginate: { itemsPerPage: perPage, currentPage: currPage }  ">
       <td>{{ account.accountNumber }}</td>
       <td>{{ account.accountName }}</td>
       <td>{{ account.accountType }}</td>
@@ -214,4 +219,19 @@
       <button class="btn btn-primary" (click)="getAccount(account.caId)" *ngIf="access == 1">Edit</button>
     </tr>
   </table>
+  <div style="display: inline-block">
+    <div style="float: left; width: 100px; position: relative; left: 5px; top: 3px">
+      <p >{{"Per Page:"}}</p>
+    </div>
+    <select id="perPage" class="form-control" style="position:relative; float: left; width: 75px; right: 20px"
+            [(ngModel)]="perPage"
+            name="account">
+      <option>5</option>
+      <option selected>10</option>
+      <option>15</option>
+      <option>20</option>
+    </select>
+    <pagination-controls style="float: left" (pageChange)="currPage = $event"></pagination-controls>
+  </div>
+
 </div>

@@ -1,15 +1,14 @@
 td, th {
   border: 1px solid #6e7d93;
-  text-align: left;
   padding: 8px;
 }
 tr:nth-child(even) {
-  background-color: #6e7d93;
+  background-color: #d0d3d6;
 }
 
 
 table, h3, h2, td {
-  color: white;
+  color: black;
 }
 #journalTable {
   font-family: arial, sans-serif;
@@ -51,6 +50,7 @@ table, h3, h2, td {
 }
 .accountslist3{
   background-color: transparent;
+  text-align: right;
   border: none;
 }
 .accountslist4{
@@ -77,3 +77,13 @@ table, h3, h2, td {
   background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
 }
 
+
+.modal-content4{
+  white-space:pre-wrap;
+  background-color: #fefefe;
+  margin: auto;
+  padding: 20px;
+  border: 1px solid #888;
+  width: 40%;
+  height: 90%;
+}

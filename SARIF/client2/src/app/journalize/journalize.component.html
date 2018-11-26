@@ -1,15 +1,28 @@
 
-    <div class="column is-half" hidden>
-      <div class="level-right">
-        <p class="level-item"><strong>All</strong></p>
-        <p class="level-item"><a>Approved</a></p>
-        <p class="level-item"><a>Needs Approval</a></p>
-        <p class="level-item"><a>Rejected</a></p>
-      </div>
+
+<div id="viewSource" class="modal">
+  <div class="modal-content4">
+    <div class="panel panel-default">
+    <div style="white-space: pre-line; position: relative; width: 100%; height: 700px;  border: 1px solid #6e7d93;">
+    {{documentInfo}}
     </div>
-    <!-- End of row 2: right column -->
+    <div  style="position: fixed; bottom: 15%; ">
+     <button style="position: fixed" (click)="closeFile()">Close</button>
+    </div>
+      </div>
+  </div>
+</div>
 
 
+<!-- End of row 2: right column -->
+
+    <div id="popupModalConfirm" class="modal2" (click)="closeConfirmationPopup()">
+       <div class="modal-content3">
+         <div class="alert alert-success">
+            Your Journal entry has been added
+         </div>
+        </div>
+    </div>
 
     <div id="createJournalEntry" class="modal">
       <div class="modal-content">
@@ -21,11 +34,16 @@
           <my-date-picker name="myDate" [options]="myDatePickerOptions" [(ngModel)]="model"  required></my-date-picker>
             </div>
 
-          <div class="form-group">
-            <label for="description">Description</label>
-            <input type="text" class="form-control" id="description" placeholder="Description" [(ngModel)]="journalNew.Description"
-                   name="description" >
+          <div>
+            <label>Account Type</label>
+            <select id="selectType" class="form-control" style="width: 200px" required>
+              <option selected>Normal</option>
+              <option>Adjusting</option>
+              <option>Post-Closing</option>
+            </select>
           </div>
+
+
           <hr id="journalAccountAddTable">
           <table>
             <tr >
@@ -36,10 +54,10 @@
 
             <tr *ngFor="let account of journalAccountsDebit" class="trbackground">
               <td class="accountsinput" style=" background-color: white">
-                <select id="debitDropDown"  class="form-control" style="width: 200px" required
+                <select id="debitDropDown"  class="form-control" style="width: 230px" required
                         [ngModelOptions]="{standalone: true}"
                          [(ngModel)]="account.AccountName" [name]="account.AccountName"
-                        (ngModelChange)="checkRepeatDebitAccount(); "
+                        (ngModelChange) = "checkRepeatAccounts()"
                           #accountSubType="ngModel">
                   <option disabled>Debits:</option>
                   <option *ngFor="let accountDeb of debitAccounts">{{accountDeb }}</option>
@@ -57,21 +75,23 @@
                 <input type="text" class="form-control" id="CreditAmount" placeholder="Credit" disabled style="text-align: right;"
                        name="description3" >
               </td>
-              <td class="accountsinput" style=" background-color: white" *ngIf="journalAccountsDebit.indexOf(account) > 0">
-                <button class="btn btn-danger" (click)="removeDebit(journalAccountsDebit.indexOf(account)); checkRepeatDebitAccount();" id="removeDebitInput"   >Remove</button>
-              </td>
+
               <td class="accountsinput" style=" background-color: white">
                 <button class="btn btn-info" (click)="addDebitInput()" id="addDebitInput"  *ngIf="journalAccountsDebit.indexOf(account) == journalAccountsDebit.length -1">Add Debit</button>
+              </td>
+              <td class="accountsinput" style=" background-color: white" *ngIf="journalAccountsDebit.indexOf(account) > 0">
+                <button class="btn btn-danger" (click)="removeDebit(journalAccountsDebit.indexOf(account)); checkRepeatAccounts();" id="removeDebitInput"   >Remove</button>
               </td>
             </tr>
 
             <tr *ngFor="let account of journalAccountsCredit" class="trbackground">
-              <td class="accountsinput" style=" background-color: white">
-              <select id="creditDropDown" class="form-control" style="width: 200px" required
+              <td class="accountsinput" style=" background-color: white; left: 30px ">
+              <select id="creditDropDown" class="form-control" style="position:relative; width: 200px; left: 30px" required
                       [ngModelOptions]="{standalone: true}"
 
                       [(ngModel)]="account.AccountName" [name]="account.AccountName"
-                      (ngModelChange)="checkRepeatCreditAccount()"
+                      (ngModelChange) = "checkRepeatAccounts()"
+
                       #accountSubType="ngModel">
                 <option disabled>Debits:</option>
                 <option *ngFor="let accountDeb of debitAccounts">{{accountDeb}}</option>
@@ -91,11 +111,12 @@
                        [name]="account.CreditAmount"
                        >
               </td>
-              <td class="accountsinput" style=" background-color: white" *ngIf="journalAccountsCredit.indexOf(account) > 0">
-                <button class="btn btn-danger" (click)="removeCredit(journalAccountsCredit.indexOf(account)); checkRepeatCreditAccount();" id="removeCreditInput"   >Remove</button>
-              </td>
+
               <td class="accountsinput" style=" background-color: white">
                 <button class="btn btn-info" (click)="addCreditInput();" id="addCreditInput"  *ngIf="journalAccountsCredit.indexOf(account) == journalAccountsCredit.length -1">Add Credit</button>
+              </td>
+              <td class="accountsinput" style=" background-color: white" *ngIf="journalAccountsCredit.indexOf(account) > 0">
+                <button class="btn btn-danger" (click)="removeCredit(journalAccountsCredit.indexOf(account)); checkRepeatAccounts();" id="removeCreditInput"   >Remove</button>
               </td>
 
             </tr>
@@ -107,6 +128,11 @@
 
              </tr>
           </table>
+          <div class="form-group">
+            <label for="description">Description</label>
+            <input type="text" class="form-control" id="description" placeholder="Description (optional)" [(ngModel)]="journalNew.Description"
+                   name="description" >
+          </div>
           <form enctype="multipart/form-data">
             <input #folderInput type="file" (change)="selectFile($event.target.files)" >
           </form>
@@ -122,8 +148,8 @@
           <div *ngIf="repeatCreditAccount == 0" class="alert alert-danger"  style="width: 340px;">
             You have duplicate accounts
           </div>
-          <button (click)="submit();" id="submitBtn" [disabled]="checkBothInputs() == 0" >Submit</button>
-          <button (click)="close(); addJournalForm.reset()" id="closeModalBtn">Cancel</button>
+          <button (click)="submit();" id="submitBtn" [disabled]="checkBothInputs() == 0" class="btn btn-primary ">Submit</button>
+          <button (click)="close(); addJournalForm.reset()" id="closeModalBtn" class="btn btn-danger " style=" position: relative; left: 10px; ">Cancel</button>
         </form>
       </div>
     </div>
@@ -141,20 +167,23 @@
       </div>
     </form>
 
-    <button class="btn btn-info btn-lg" (click)="openCreateJournal()" >Add Journal</button>
-    <div class="btn-group btn-group-toggle" data-toggle="buttons" style="float: right; margin-right: 8%">
-      <label class="btn btn-secondary">
-        <input type="radio" name="options" id="option1" autocomplete="off" checked (click)="setApprovalType('Approved')">Approved
-      </label>
-      <label class="btn btn-secondary">
-        <input type="radio" name="options" id="option2" autocomplete="off" (click)="setApprovalType('Declined')">Declined
-      </label>
-      <label class="btn btn-secondary">
-        <input type="radio" name="options" id="option3" autocomplete="off" (click)="setApprovalType(null)">Pending
-      </label>
+    <button class="btn btn-info btn-lg" (click)="openCreateJournal()" >Journalize</button>
+    <div class="btn-group" style="float: right; margin-right: 8%">
+
+        <button type="button" class="btn btn-primary" name="options"   (click)="setApprovalType('all')">All</button>
+
+
+        <button type="button" class="btn btn-primary" name="options"  (click)="setApprovalType('Approved')">Approved</button>
+
+
+        <button type="button" class="btn btn-primary" name="options"  (click)="setApprovalType('Declined')">Declined</button>
+
+
+        <button type="button" class="btn btn-primary" name="options" (click)="setApprovalType(null)">Pending</button>
+
     </div>
 <div>
-  <table id="journalTable" style=" table-layout:fixed">
+  <table id="journalTable" >
     <thead>
     <tr>
       <th colspan="8" class="col-xs-1 text-center">General Journal</th>
@@ -171,57 +200,87 @@
     </tr>
     </thead>
 
-    <tr *ngFor="let journal of journals">
+    <tr *ngFor="let journal of journals | paginate: { itemsPerPage: perPage, currentPage: currPage }">
       <td style="vertical-align: top"  >{{ journal.Date | date: 'MM/dd/yyyy'}}</td>
-      <td>
+      <td style="vertical-align: top">
+        <table>
         <tr *ngFor="let jaccount of journal.JournalAccounts" style=" background-color: transparent">
-         <td class="accountslist2">{{jaccount.Type}}</td>
+         <td class="accountslist2" >{{jaccount.Type}}
+         </td>
         </tr>
+      </table>
       </td>
       <td style="vertical-align: top" >{{ journal.CreatedBy }}</td>
       <td>
+       <table>
         <tr *ngFor="let jaccount of journal.JournalAccounts" style=" background-color: transparent" >
           <td  class="accountslist2" *ngIf="jaccount.NormalSide == 'Credit'" >
-            <button class="hover" style="color: white" (click)="viewLedger(jaccount.AccountName)" id="button1" >{{ jaccount.AccountName }}</button></td>
+            <button class="btn btn-link " style="color: dodgerblue" (click)="viewLedger(jaccount.AccountName)" id="button1" >{{ jaccount.AccountName }}</button></td>
           <td  class="accountslist" *ngIf="jaccount.NormalSide == 'Debit'">
-            <button class="hover" style="color: white" (click)="viewLedger(jaccount.AccountName)" id="button2" >{{ jaccount.AccountName }}</button>
-          </td>
-
+            <button class="btn btn-link " style="color: dodgerblue" (click)="viewLedger(jaccount.AccountName)" id="button2" >{{ jaccount.AccountName }}</button></td>
        </tr>
-      </td>
+        <tr style=" background-color: transparent">
+          <td class="accountslist" *ngIf="journal.Description != null">{{'Description: ' + journal.Description}}</td>
+          <td class="accountslist" *ngIf="journal.Description == null">{{'Description: none'}}</td>
+        </tr>
+        <tr style=" background-color: transparent" *ngIf="journal.FileID != null && journal.FileID > 0">
+          <td  class="accountslist">
+            <button class="btn btn-link " style="color: dodgerblue" (click)="getJournalFile(journal.FileID)" >View Document</button>
+          </td>
+        </tr>
+      </table>
 
       <td style="vertical-align: top">{{ journal.Reference }}</td>
 
-      <td >
-        <table class="tableAlign">
+      <td style="vertical-align: top">
+        <table class="tableAlign" >
         <tr *ngFor="let jaccount of journal.JournalAccounts; let b = index" style=" background-color: transparent">
           <td class="accountslist"  *ngIf="jaccount.DebitAmount == null"  style="text-align: right;">&nbsp;</td>
           <td class="accountslist"  *ngIf="jaccount.DebitAmount != null && b == 0"  style="float:right">{{"$"+(jaccount.DebitAmount | number : '1.2-2')}}</td>
           <td class="accountslist3"  *ngIf="jaccount.DebitAmount != null && b != 0"  style="text-align: right;">{{(jaccount.DebitAmount | number : '1.2-2')}}</td>
         </tr>
+          <tr style=" background-color: transparent">
+            <td class="accountslist">&nbsp;</td>
+          </tr>
         </table>
       </td>
 
-      <td >
+      <td style="vertical-align: top">
         <table class="tableAlign">
         <tr *ngFor="let jaccount of journal.JournalAccounts; let i = index" style=" background-color: transparent;">
           <td class="accountslist"  *ngIf="jaccount.CreditAmount == null"  style="text-align: right;">&nbsp;</td>
           <td class="accountslist"  *ngIf="jaccount.CreditAmount != null && i == getNumberDebits(journal.JournalAccounts)"  style="text-align: right;">{{"$"+(jaccount.CreditAmount | number : '1.2-2')}}</td>
           <td class="accountslist3" *ngIf="jaccount.CreditAmount != null && i != getNumberDebits(journal.JournalAccounts)"  style="text-align: right;">{{(jaccount.CreditAmount | number : '1.2-2')}}</td>
         </tr>
+          <tr style=" background-color: transparent">
+            <td class="accountslist">&nbsp;</td>
+          </tr>
         </table>
       </td>
-    <td style="vertical-align: top">
-      <div *ngIf="access == 2">
+    <td style="vertical-align: top" width="210">
+      <div *ngIf="access == 2" style="display: inline-block">
         <button class="btn btn-info" style="" (click)="approveJournal(journal)"  *ngIf="journal.acceptance == null" >Approve</button>
+      </div>
+      <div *ngIf="access == 2" style="display: inline-block; position: relative; left: 5px">
+        <button class="btn btn-danger" (click)="declineJournal(journal)"  *ngIf="journal.acceptance == null" >Decline</button>
       </div>
       <label *ngIf="journal.acceptance != null">{{journal.acceptance}}</label>
       <label *ngIf="journal.acceptance == null && access == 3">Pending</label>
-      <div *ngIf="access == 2">
-        <button class="btn btn-danger" style="width: 95px" (click)="declineJournal(journal)"  *ngIf="journal.acceptance == null" >Decline</button>
-      </div>
-    </td>
 
-    </tr>
+    </td>
   </table>
+  <div style="display: inline-block">
+    <div style="float: left; width: 100px; position: relative; left: 5px; top: 3px">
+    <p >{{"Per Page:"}}</p>
+    </div>
+    <select id="perPage" class="form-control" style="position:relative; float: left; width: 75px; right: 20px"
+            [(ngModel)]="perPage"
+            name="account">
+      <option>5</option>
+      <option>10</option>
+      <option>15</option>
+      <option>20</option>
+    </select>
+  <pagination-controls style="float: left" (pageChange)="currPage = $event"></pagination-controls>
+  </div>
 </div>

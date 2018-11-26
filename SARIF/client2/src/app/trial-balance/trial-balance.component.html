@@ -1,16 +1,72 @@
 <div class="form-group" style="margin: auto; width: 50%;">
-  <table id="ledgerTable" style=" table-layout:fixed">
+  <table id="ledgerTable" style=" width: 100%;">
     <tr>
-      <th colspan="4" class="col-xs-1 text-center">Trial Balance</th>
+      <th colspan="4" class="text-center" style="">
+        <div>
+          <label style="line-height: 0px">Sarif Financial</label>
+        </div>
+        <div>
+        <label style="line-height: 0px">{{trialTitle}}</label>
+        </div>
+        <div>
+        <label>{{'For the Year Ended ' + (currentDate | date: 'MM/dd/yyyy')}}</label>
+          </div>
+
+      </th>
     <tr>
     <tr>
-      <th >Title of Account</th>
-      <th >Account Number</th>
-      <th >Debit Balance</th>
-      <th >Credit Balance</th>
+      <th style="text-align: center">Account</th>
+      <th style="text-align: center">Number</th>
+      <th style="text-align: center">Debit </th>
+      <th style="text-align: center">Credit </th>
     </tr>
-    <tr *ngFor="let account of accountsArranged">
-      <td>{{ account.accountName }}</td>
+    <tr *ngFor="let account of assetslist; let b = index">
+      <td>
+        <button class="btn btn-link" (click)="viewLedger(account.accountName)">{{account.accountName}}</button>
+      </td>
+      <td>{{ account.accountNumber }}</td>
+      <td *ngIf="account.normalSide == 'Debit' && b == 0" style="text-align: right;">{{ '$'+(account.currentBalance | number : '1.2-2')}}</td>
+      <td *ngIf="account.normalSide == 'Debit' && b != 0 && account.currentBalance >= 0" style="text-align: right;">{{ account.currentBalance | number : '1.2-2'}}</td>
+      <td *ngIf="account.normalSide == 'Debit' && b != 0 && account.currentBalance < 0" style="text-align: right;">{{ '('+(convertNumNegative(account.currentBalance) | number : '1.2-2')+')'}}</td>
+      <td *ngIf="account.normalSide == 'Debit'" style="text-align: right;">&nbsp;</td>
+      <td *ngIf="account.normalSide == 'Credit'" style="text-align: right;">&nbsp;</td>
+      <td *ngIf="account.normalSide == 'Credit'" style="text-align: right;">{{ account.currentBalance | number : '1.2-2'}}</td>
+    </tr>
+    <tr *ngFor="let account of liabilitiesList; let b = index">
+      <td>
+        <button class="btn btn-link" (click)="viewLedger(account.accountName)">{{account.accountName}}</button>
+      </td>
+      <td>{{ account.accountNumber }}</td>
+      <td *ngIf="account.normalSide == 'Debit'" style="text-align: right;">{{ account.currentBalance | number : '1.2-2'}}</td>
+      <td *ngIf="account.normalSide == 'Debit'" style="text-align: right;">&nbsp;</td>
+      <td *ngIf="account.normalSide == 'Credit'" style="text-align: right;">&nbsp;</td>
+      <td *ngIf="account.normalSide == 'Credit' && b == 0" style="text-align: right;">{{ '$'+(account.currentBalance | number : '1.2-2')}}</td>
+      <td *ngIf="account.normalSide == 'Credit' && b != 0" style="text-align: right;">{{ account.currentBalance | number : '1.2-2'}}</td>
+    </tr>
+    <tr *ngFor="let account of equitList; let b = index">
+      <td>
+        <button class="btn btn-link" (click)="viewLedger(account.accountName)">{{account.accountName}}</button>
+      </td>
+      <td>{{ account.accountNumber }}</td>
+      <td *ngIf="account.normalSide == 'Debit'" style="text-align: right;">{{ account.currentBalance | number : '1.2-2'}}</td>
+      <td *ngIf="account.normalSide == 'Debit'" style="text-align: right;">&nbsp;</td>
+      <td *ngIf="account.normalSide == 'Credit'" style="text-align: right;">&nbsp;</td>
+      <td *ngIf="account.normalSide == 'Credit'" style="text-align: right;">{{ account.currentBalance | number : '1.2-2'}}</td>
+    </tr>
+    <tr *ngFor="let account of revenueList; let b = index">
+      <td>
+        <button class="btn btn-link" (click)="viewLedger(account.accountName)">{{account.accountName}}</button>
+      </td>
+      <td>{{ account.accountNumber }}</td>
+      <td *ngIf="account.normalSide == 'Debit'" style="text-align: right;">{{ account.currentBalance | number : '1.2-2'}}</td>
+      <td *ngIf="account.normalSide == 'Debit'" style="text-align: right;">&nbsp;</td>
+      <td *ngIf="account.normalSide == 'Credit'" style="text-align: right;">&nbsp;</td>
+      <td *ngIf="account.normalSide == 'Credit'" style="text-align: right;">{{ account.currentBalance | number : '1.2-2'}}</td>
+    </tr>
+    <tr *ngFor="let account of expensesList; let b = index">
+      <td>
+        <button class="btn btn-link" (click)="viewLedger(account.accountName)">{{account.accountName}}</button>
+      </td>
       <td>{{ account.accountNumber }}</td>
       <td *ngIf="account.normalSide == 'Debit'" style="text-align: right;">{{ account.currentBalance | number : '1.2-2'}}</td>
       <td *ngIf="account.normalSide == 'Debit'" style="text-align: right;">&nbsp;</td>
@@ -20,8 +76,9 @@
     <tr>
       <th ></th>
       <th ></th>
-      <th style="text-align: right;">{{debitTotal | number : '1.2-2'}}</th>
-      <th style="text-align: right;">{{creditTotal | number : '1.2-2'}}</th>
+      <th style="text-align: right;"><p class="newclass">{{'$' +(debitTotal | number : '1.2-2')}}</p></th>
+      <th style="text-align: right;"><p class="newclass">{{'$' +(creditTotal | number : '1.2-2')}}</p></th>
     </tr>
   </table>
+  <button class="btn btn-primary" (click)="convertPDF()">Download Table</button>
 </div>

@@ -22,6 +22,13 @@ import { IndividualLedgerComponent } from './individual-ledger/individual-ledger
 import { TextMaskModule } from 'angular2-text-mask';
 import { TrialBalanceComponent } from './trial-balance/trial-balance.component';
 import { IndividualJournalComponent } from './individual-journal/individual-journal.component';
+import {NgxPaginationModule} from 'ngx-pagination';
+import { DashboardComponent } from './dashboard/dashboard.component';
+import { IncomeStatementComponent } from './income-statement/income-statement.component';
+import { RetainedEarningsComponent } from './retained-earnings/retained-earnings.component';
+import { BalanceSheetComponent } from './balance-sheet/balance-sheet.component';
+import { ChartsModule } from 'ng2-charts';
+
 
 @NgModule({
   declarations: [
@@ -41,6 +48,10 @@ import { IndividualJournalComponent } from './individual-journal/individual-jour
     IndividualLedgerComponent,
     TrialBalanceComponent,
     IndividualJournalComponent,
+    DashboardComponent,
+    IncomeStatementComponent,
+    RetainedEarningsComponent,
+    BalanceSheetComponent,
   ],
   imports: [
     BrowserModule,
@@ -49,7 +60,9 @@ import { IndividualJournalComponent } from './individual-journal/individual-jour
     Ng2Webstorage,
     HttpClientModule,
     MyDatePickerModule,
-    TextMaskModule
+    TextMaskModule,
+    NgxPaginationModule,
+    ChartsModule
   ],
   providers: [CookieService],
   bootstrap: [AppComponent]

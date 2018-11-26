@@ -1,6 +1,10 @@
 import { Component, OnInit } from '@angular/core';
 import {CoAService} from '../services/coa.service';
 import {CoA} from '../chart-of-accounts';
+import {SharedDataService} from '../services/shared-data.service';
+import {Router} from '@angular/router';
+
+declare var jsPDF: any;
 
 @Component({
   selector: 'app-trial-balance',
@@ -8,10 +12,14 @@ import {CoA} from '../chart-of-accounts';
   styleUrls: ['./trial-balance.component.css']
 })
 export class TrialBalanceComponent implements OnInit {
+
+  trialTitle = '';
+
   accounts = [];
   accountsArranged = [];
   debitTotal = 0;
   creditTotal = 0;
+  currentDate: Date;
 
   assetslist = [];
   liabilitiesList = [];
@@ -21,14 +29,17 @@ export class TrialBalanceComponent implements OnInit {
 
   constructor(
     private cserv: CoAService,
+    private data: SharedDataService,
+    private router: Router,
   ) { }
 
-  ngOnInit() {
+  ngOnInit(){
+    this.trialTitle = this.data.getTrialBalance();
+    this.currentDate = new Date();
     this.debitTotal = 0;
     this.creditTotal = 0;
     this.viewAccounts();
     console.log('hello');
-
   }
 
   async viewAccounts() {
@@ -37,22 +48,53 @@ export class TrialBalanceComponent implements OnInit {
     this.accounts = result;
     //arranging accounts by type
     for(let acc of this.accounts){
-      if(acc.accountType == 'Assets'){
+      if(acc.accountType == 'Assets' && acc.currentBalance != 0){
         this.assetslist.push(acc);
       }
-      else if(acc.accountType == 'Liability'){
+      else if(acc.accountType == 'Liability'  && acc.currentBalance != 0){
         this.liabilitiesList.push(acc);
       }
-      else if(acc.accountType == 'Equity'){
+      else if(acc.accountType == 'Equity'  && acc.currentBalance != 0){
         this.equitList.push(acc);
       }
-      else if(acc.accountType == 'Revenue'){
+      else if(acc.accountType == 'Revenue'  && acc.currentBalance != 0){
         this.revenueList.push(acc);
       }
       else{
-        this.expensesList.push(acc);
+        if(acc.currentBalance != 0) {
+          this.expensesList.push(acc);
+        }
       }
     }
+
+    this.assetslist.sort(function(a, b) {
+      var textA = a.accountNumber;
+      var textB = b.accountNumber;
+      return (textA < textB) ? -1 : (textA > textB) ? 1 : 0;
+    });
+
+    this.liabilitiesList.sort(function(a, b) {
+      var textA = a.accountNumber;
+      var textB = b.accountNumber;
+      return (textA < textB) ? -1 : (textA > textB) ? 1 : 0;
+    });
+
+    this.equitList.sort(function(a, b) {
+      var textA = a.accountNumber;
+      var textB = b.accountNumber;
+      return (textA < textB) ? -1 : (textA > textB) ? 1 : 0;
+    });
+
+    this.revenueList.sort(function(a, b) {
+      var textA = a.accountNumber;
+      var textB = b.accountNumber;
+      return (textA < textB) ? -1 : (textA > textB) ? 1 : 0;
+    });
+    this.expensesList.sort(function(a, b) {
+      var textA = a.accountNumber;
+      var textB = b.accountNumber;
+      return (textA < textB) ? -1 : (textA > textB) ? 1 : 0;
+    });
     //put arranged lists into one list
 
     for(let asset of this.assetslist){
@@ -78,11 +120,25 @@ export class TrialBalanceComponent implements OnInit {
     this.totalCredit();
   }
 
+  convertNumNegative(num: number){
+    if(num < 0){
+      return Math.abs(num);
+    }
+    else {
+      return num
+    }
+  }
+
   totalDebit(){
     for(let acc of this.accountsArranged){
       console.log(acc.currentBalance);
       if(acc.normalSide == 'Debit'){
-        this.debitTotal = +this.debitTotal + +acc.currentBalance;
+        if(acc.currentBalance < 0){
+          this.creditTotal = +this.creditTotal - +acc.currentBalance;
+        }
+        else {
+          this.debitTotal = +this.debitTotal + +acc.currentBalance;
+        }
       }
     }
   }
@@ -90,10 +146,49 @@ export class TrialBalanceComponent implements OnInit {
     for(let acc of this.accountsArranged){
       console.log(acc.currentBalance);
       if(acc.normalSide == 'Credit'){
-        this.creditTotal = +this.creditTotal + +acc.currentBalance;
+        if(acc.currentBalance < 0){
+          this.debitTotal = +this.debitTotal - +acc.currentBalance;
+        }
+        else {
+          this.creditTotal = +this.creditTotal + +acc.currentBalance;
+        }
       }
     }
 
+  }
+
+  //route to account ledger
+  viewLedger(accountName){
+    this.data.setAccount(accountName);
+    this.router.navigate(['UserPage/ledger', accountName]);
+  }
+
+  convertPDF(){
+    let columns = ['Account', 'Number', 'Debit', 'Credit'];
+    var doc = new jsPDF('p', 'pt');
+    var rows = [];
+    for(let acc of this.accountsArranged){
+
+
+      if(acc.normalSide == 'Debit') {
+       let num = parseFloat(''+Math.round(acc.currentBalance * 100) / 100).toFixed(2);
+        let account = [acc.accountName, acc.accountNumber ,num, ' '];
+        rows.push(account);
+      }
+      else{
+        let num = parseFloat(''+Math.round(acc.currentBalance * 100) / 100).toFixed(2);
+        let account = [acc.accountName, acc.accountNumber, ' ', num];
+        rows.push(account);
+      }
+    }
+    rows.push([' ', ' ', this.debitTotal, this.creditTotal]);
+    doc.setFontSize(12);
+    doc.text(226, 40, this.data.getTrialBalance());
+    doc.text(210, 60, 'For the Year Ended ' +this.currentDate.getMonth() +'/'+ this.currentDate.getDate() +'/'+ this.currentDate.getFullYear());
+
+    doc.autoTable(columns, rows, {startY: 68, columnStyles: {
+        0: {columnWidth: 350}, 2: {halign: 'right'}, 3: {halign: 'right'}, }});
+    doc.save(this.data.getTrialBalance() + '.pdf');
   }
 
 }
